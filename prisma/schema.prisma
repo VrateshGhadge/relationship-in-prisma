@@ -32,39 +32,90 @@ datasource db {
 //   user          User    @relation(fields: [userId], references: [id]) //relationship
 // }
 
-model Customer {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  orders    Order[]
+
+// ------------------------------------------------------
+
+
+// model Customer {
+//   id        Int      @id @default(autoincrement())
+//   email     String   @unique
+//   name      String
+//   orders    Order[]
+//   createdAt DateTime @default(now())
+// }
+
+// model Product {
+//   id          Int         @id @default(autoincrement())
+//   sku         String      @unique
+//   name        String
+//   price       Float       
+//   inventory   Int         @default(0)
+//   orderItems  OrderItem[]
+// }
+
+// model Order {
+//   id          Int         @id @default(autoincrement())
+//   status      String      @default("PENDING")
+//   totalAmount Float       @default(0.0)
+//   createdAt   DateTime    @default(now())
+//   customerId  Int
+//   customer    Customer    @relation(fields: [customerId], references: [id])
+//   items       OrderItem[]
+// }
+
+// model OrderItem {
+//   id              Int     @id @default(autoincrement())
+//   quantity        Int
+//   priceAtPurchase Float   
+//   orderId         Int
+//   order           Order   @relation(fields: [orderId], references: [id])
+//   productId       Int
+//   product         Product @relation(fields: [productId], references: [id])
+// }
+
+
+// ------------------------------------------------------
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  email     String    @unique
+  videos    Video[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Video {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  thumbnailUrl String?
+  videoUrl     String
+  views        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  authorId     String
+  author       User      @relation(fields: [authorId], references: [id])
+  comments     Comment[]
+  likes        Like[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
   createdAt DateTime @default(now())
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
 }
 
-model Product {
-  id          Int         @id @default(autoincrement())
-  sku         String      @unique
-  name        String
-  price       Float       
-  inventory   Int         @default(0)
-  orderItems  OrderItem[]
-}
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id])
 
-model Order {
-  id          Int         @id @default(autoincrement())
-  status      String      @default("PENDING")
-  totalAmount Float       @default(0.0)
-  createdAt   DateTime    @default(now())
-  customerId  Int
-  customer    Customer    @relation(fields: [customerId], references: [id])
-  items       OrderItem[]
-}
-
-model OrderItem {
-  id              Int     @id @default(autoincrement())
-  quantity        Int
-  priceAtPurchase Float   
-  orderId         Int
-  order           Order   @relation(fields: [orderId], references: [id])
-  productId       Int
-  product         Product @relation(fields: [productId], references: [id])
+  @@unique([userId, videoId])
 }
