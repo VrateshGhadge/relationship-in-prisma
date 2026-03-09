@@ -1,25 +1,25 @@
-// import { PrismaClient } from "./generated/prisma/client.js";
-// import { PrismaPg } from "@prisma/adapter-pg";
-// import "dotenv/config";
+import { PrismaClient } from "./generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
 
-// const adapter = new PrismaPg({
-//   connectionString: process.env.DATABASE_URL!,
-// });
-// export const prisma = new PrismaClient({ adapter });
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+export const prisma = new PrismaClient({ adapter });
 
-// // async function insertUser(username: string, password: string, firstName: string, lastName: string) {
-// //   const res = await prisma.user.create({
-// //     data: {
-// //       username,
-// //       password,
-// //       firstName,
-// //       lastName,
-// //     },
-// //   });
-// //   console.log(res);
-// // }
+async function insertUser(username: string, password: string, firstName: string, lastName: string) {
+  const res = await prisma.user.create({
+    data: {
+      username,
+      password,
+      firstName,
+      lastName,
+    },
+  });
+  console.log(res);
+}
 
-// // insertUser("exampl1212e1", "password11223", "John11212", "Doe11212")
+insertUser("exampl1212e1", "password11223", "John11212", "Doe11212")
 
 
 // // async function getTodoAndUserDetails(userId: number) {
@@ -307,95 +307,95 @@
 
 
 
-import { PrismaClient } from "./generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import "dotenv/config";
+// import { PrismaClient } from "./generated/prisma/client.js";
+// import { PrismaPg } from "@prisma/adapter-pg";
+// import "dotenv/config";
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
-});
-export const prisma = new PrismaClient({ adapter });
+// const adapter = new PrismaPg({
+//   connectionString: process.env.DATABASE_URL!,
+// });
+// export const prisma = new PrismaClient({ adapter });
 
 
-  async function main() {
-  const pm = await prisma.user.upsert({
-    where: { email: 'alice@company.com' },
-    update: {},
-    create: { email: 'alice@company.com', name: 'Alice (Product)' }
-  })
+//   async function main() {
+//   const pm = await prisma.user.upsert({
+//     where: { email: 'alice@company.com' },
+//     update: {},
+//     create: { email: 'alice@company.com', name: 'Alice (Product)' }
+//   })
 
-  const dev = await prisma.user.upsert({
-    where: { email: 'bob@company.com' },
-    update: {},
-    create: { email: 'bob@company.com', name: 'Bob (Engineering)' }
-  })
+//   const dev = await prisma.user.upsert({
+//     where: { email: 'bob@company.com' },
+//     update: {},
+//     create: { email: 'bob@company.com', name: 'Bob (Engineering)' }
+//   })
 
-  const project = await prisma.project.create({
-    data: {
-      name: 'Frontend Overhaul',
-      identifier: 'ENG',
-      issues: {
-        create: [
-          {
-            title: 'Setup Next.js and Tailwind',
-            status: IssueStatus.DONE,
-            priority: Priority.HIGH,
-            reporterId: pm.id,
-            assigneeId: dev.id
-          },
-          {
-            title: 'Implement Dark Mode Toggle',
-            status: IssueStatus.TODO,
-            priority: Priority.MEDIUM,
-            reporterId: pm.id
-          },
-          {
-            title: 'Fix Auth Hydration Error',
-            status: IssueStatus.IN_PROGRESS,
-            priority: Priority.URGENT,
-            reporterId: pm.id,
-            assigneeId: dev.id
-          }
-        ]
-      }
-    },
-    include: {
-      issues: {
-        include: {
-          assignee: { select: { name: true } },
-          reporter: { select: { name: true } }
-        }
-      }
-    }
-  })
+//   const project = await prisma.project.create({
+//     data: {
+//       name: 'Frontend Overhaul',
+//       identifier: 'ENG',
+//       issues: {
+//         create: [
+//           {
+//             title: 'Setup Next.js and Tailwind',
+//             status: IssueStatus.DONE,
+//             priority: Priority.HIGH,
+//             reporterId: pm.id,
+//             assigneeId: dev.id
+//           },
+//           {
+//             title: 'Implement Dark Mode Toggle',
+//             status: IssueStatus.TODO,
+//             priority: Priority.MEDIUM,
+//             reporterId: pm.id
+//           },
+//           {
+//             title: 'Fix Auth Hydration Error',
+//             status: IssueStatus.IN_PROGRESS,
+//             priority: Priority.URGENT,
+//             reporterId: pm.id,
+//             assigneeId: dev.id
+//           }
+//         ]
+//       }
+//     },
+//     include: {
+//       issues: {
+//         include: {
+//           assignee: { select: { name: true } },
+//           reporter: { select: { name: true } }
+//         }
+//       }
+//     }
+//   })
 
-  const urgentDevIssues = await prisma.issue.findMany({
-    where: {
-      assigneeId: dev.id,
-      priority: { in: [Priority.HIGH, Priority.URGENT] },
-      status: { not: IssueStatus.DONE }
-    },
-    select: {
-      title: true,
-      status: true,
-      priority: true,
-      project: { select: { identifier: true } }
-    }
-  })
+//   const urgentDevIssues = await prisma.issue.findMany({
+//     where: {
+//       assigneeId: dev.id,
+//       priority: { in: [Priority.HIGH, Priority.URGENT] },
+//       status: { not: IssueStatus.DONE }
+//     },
+//     select: {
+//       title: true,
+//       status: true,
+//       priority: true,
+//       project: { select: { identifier: true } }
+//     }
+//   })
 
-  console.log('--- Project Created ---')
-  console.dir(project, { depth: null })
+//   console.log('--- Project Created ---')
+//   console.dir(project, { depth: null })
   
-  console.log('\n--- Active Urgent Issues for Bob ---')
-  console.dir(urgentDevIssues, { depth: null })
-}
+//   console.log('\n--- Active Urgent Issues for Bob ---')
+//   console.dir(urgentDevIssues, { depth: null })
+// }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect()
+//   })
+//   .catch(async (e) => {
+//     console.error(e)
+//     await prisma.$disconnect()
+//     process.exit(1)
+//   })
