@@ -236,6 +236,77 @@
 
 
 
+// import { PrismaClient } from "./generated/prisma/client.js";
+// import { PrismaPg } from "@prisma/adapter-pg";
+// import "dotenv/config";
+
+// const adapter = new PrismaPg({
+//   connectionString: process.env.DATABASE_URL!,
+// });
+// export const prisma = new PrismaClient({ adapter });
+
+
+// async function main() {
+//   const applicant = await prisma.user.upsert({
+//     where: { email: 'dev@example.com' },
+//     update: {},
+//     create: { email: 'dev@example.com' }
+//   })
+
+//   const techCorp = await prisma.company.upsert({
+//     where: { name: 'Global Tech Remote' },
+//     update: {},
+//     create: { name: 'Global Tech Remote', industry: 'Software' }
+//   })
+
+//   const myApplication = await prisma.application.create({
+//     data: {
+//       role: 'Full Stack Engineer',
+//       salary: '12 LPA',
+//       status: AppStatus.INTERVIEWING,
+//       userId: applicant.id,
+//       companyId: techCorp.id,
+//       interviews: {
+//         create: [
+//           {
+//             round: 1,
+//             type: 'DSA & Problem Solving',
+//             scheduledDate: new Date('2026-03-15T10:00:00Z')
+//           },
+//           {
+//             round: 2,
+//             type: 'System Design',
+//             scheduledDate: new Date('2026-03-18T14:00:00Z')
+//           }
+//         ]
+//       }
+//     },
+//     include: {
+//       company: true,
+//       interviews: {
+//         orderBy: { round: 'asc' }
+//       }
+//     }
+//   })
+
+//   console.dir(myApplication, { depth: null })
+// }
+
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect()
+//   })
+//   .catch(async (e) => {
+//     console.error(e)
+//     await prisma.$disconnect()
+//     process.exit(1)
+//   })
+
+
+
+
+
+
 import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
@@ -246,50 +317,77 @@ const adapter = new PrismaPg({
 export const prisma = new PrismaClient({ adapter });
 
 
-async function main() {
-  const applicant = await prisma.user.upsert({
-    where: { email: 'dev@example.com' },
+  async function main() {
+  const pm = await prisma.user.upsert({
+    where: { email: 'alice@company.com' },
     update: {},
-    create: { email: 'dev@example.com' }
+    create: { email: 'alice@company.com', name: 'Alice (Product)' }
   })
 
-  const techCorp = await prisma.company.upsert({
-    where: { name: 'Global Tech Remote' },
+  const dev = await prisma.user.upsert({
+    where: { email: 'bob@company.com' },
     update: {},
-    create: { name: 'Global Tech Remote', industry: 'Software' }
+    create: { email: 'bob@company.com', name: 'Bob (Engineering)' }
   })
 
-  const myApplication = await prisma.application.create({
+  const project = await prisma.project.create({
     data: {
-      role: 'Full Stack Engineer',
-      salary: '12 LPA',
-      status: AppStatus.INTERVIEWING,
-      userId: applicant.id,
-      companyId: techCorp.id,
-      interviews: {
+      name: 'Frontend Overhaul',
+      identifier: 'ENG',
+      issues: {
         create: [
           {
-            round: 1,
-            type: 'DSA & Problem Solving',
-            scheduledDate: new Date('2026-03-15T10:00:00Z')
+            title: 'Setup Next.js and Tailwind',
+            status: IssueStatus.DONE,
+            priority: Priority.HIGH,
+            reporterId: pm.id,
+            assigneeId: dev.id
           },
           {
-            round: 2,
-            type: 'System Design',
-            scheduledDate: new Date('2026-03-18T14:00:00Z')
+            title: 'Implement Dark Mode Toggle',
+            status: IssueStatus.TODO,
+            priority: Priority.MEDIUM,
+            reporterId: pm.id
+          },
+          {
+            title: 'Fix Auth Hydration Error',
+            status: IssueStatus.IN_PROGRESS,
+            priority: Priority.URGENT,
+            reporterId: pm.id,
+            assigneeId: dev.id
           }
         ]
       }
     },
     include: {
-      company: true,
-      interviews: {
-        orderBy: { round: 'asc' }
+      issues: {
+        include: {
+          assignee: { select: { name: true } },
+          reporter: { select: { name: true } }
+        }
       }
     }
   })
 
-  console.dir(myApplication, { depth: null })
+  const urgentDevIssues = await prisma.issue.findMany({
+    where: {
+      assigneeId: dev.id,
+      priority: { in: [Priority.HIGH, Priority.URGENT] },
+      status: { not: IssueStatus.DONE }
+    },
+    select: {
+      title: true,
+      status: true,
+      priority: true,
+      project: { select: { identifier: true } }
+    }
+  })
+
+  console.log('--- Project Created ---')
+  console.dir(project, { depth: null })
+  
+  console.log('\n--- Active Urgent Issues for Bob ---')
+  console.dir(urgentDevIssues, { depth: null })
 }
 
 main()
